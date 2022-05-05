@@ -1096,7 +1096,7 @@ exports.MangaStream = exports.getExportVersion = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const MangaStreamParser_1 = require("./MangaStreamParser");
 // Set the version for the base, changing this version will change the versions of all sources
-const BASE_VERSION = '1.0.0';
+const BASE_VERSION = '1.0.1';
 const getExportVersion = (EXTENSION_VERSION) => {
     return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.');
 };
@@ -1233,7 +1233,7 @@ class MangaStream extends paperback_extensions_common_1.Source {
          * Selector Default = "h2:contains(Popular Today)"
         */
         this.homescreen_PopularToday_enabled = true;
-        this.homescreen_PopularToday_selector = 'h2:contains(Popular Today)';
+        this.homescreen_PopularToday_selector = 'h2:contains(Terpopuler Hari Ini)';
         this.homescreen_LatestUpdate_enabled = true;
         this.homescreen_LatestUpdate_selector_box = 'h2:contains(Latest Update)';
         this.homescreen_LatestUpdate_selector_item = 'div.uta';
@@ -1372,7 +1372,7 @@ class MangaStream extends paperback_extensions_common_1.Source {
     }
     getHomePageSections(sectionCallback) {
         return __awaiter(this, void 0, void 0, function* () {
-            const section1 = createHomeSection({ id: 'popular_today', title: 'Popular Today', view_more: true });
+            const section1 = createHomeSection({ id: 'popular_today', title: 'Popular Today', view_more: false });
             const section2 = createHomeSection({ id: 'latest_update', title: 'Latest Updates', view_more: true });
             const section3 = createHomeSection({ id: 'new_titles', title: 'New Titles', view_more: true });
             const section4 = createHomeSection({ id: 'top_alltime', title: 'Top All Time', view_more: false });
@@ -1674,7 +1674,7 @@ class MangaStreamParser {
                 }
                 for (const manga of $('div.bsx', $(source.homescreen_PopularToday_selector).parent().next()).toArray()) {
                     const id = this.idCleaner((_c = $('a', manga).attr('href')) !== null && _c !== void 0 ? _c : '', source);
-                    const title = $('a', manga).attr('title');
+                    const title = $('div.tt', manga).text().trim();
                     const image = (_e = (_d = this.getImageSrc($('img', manga))) === null || _d === void 0 ? void 0 : _d.split('?resize')[0]) !== null && _e !== void 0 ? _e : '';
                     const subtitle = $('div.epxs', manga).text().trim();
                     if (!id || !title)
@@ -1700,7 +1700,7 @@ class MangaStreamParser {
                     const id = this.idCleaner((_h = $('a', manga).attr('href')) !== null && _h !== void 0 ? _h : '', source);
                     const title = $('a', manga).attr('title');
                     const image = (_k = (_j = this.getImageSrc($('img', manga))) === null || _j === void 0 ? void 0 : _j.split('?resize')[0]) !== null && _k !== void 0 ? _k : '';
-                    const subtitle = $('li > span', $('div.luf', manga)).first().text().trim();
+                    const subtitle = $('a', $('li', manga).first()).text().trim();
                     if (!id || !title)
                         continue;
                     latestUpdate.push(createMangaTile({
