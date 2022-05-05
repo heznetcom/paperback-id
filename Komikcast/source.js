@@ -950,6 +950,14 @@ exports.KomikcastInfo = {
         {
             text: 'Indonesia',
             type: paperback_extensions_common_1.TagType.GREY
+        },
+        {
+            text: 'CloudFlare',
+            type: paperback_extensions_common_1.TagType.RED
+        },
+        {
+            text: 'Buggy',
+            type: paperback_extensions_common_1.TagType.RED
         }
     ]
 };
@@ -1013,7 +1021,7 @@ exports.KomikcastMain = exports.getExportVersion = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const KomikcastMainParser_1 = require("./KomikcastMainParser");
 // Set the version for the base, changing this version will change the versions of all sources
-const BASE_VERSION = '1.0.0';
+const BASE_VERSION = '1.0.1';
 const getExportVersion = (EXTENSION_VERSION) => {
     return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.');
 };
@@ -1359,7 +1367,7 @@ class KomikcastMain extends paperback_extensions_common_1.Source {
     }
     getCloudflareBypassRequest() {
         return createRequestObject({
-            url: `${this.baseUrl}/`,
+            url: `${this.baseUrl}/?s=naruto`,
             method: 'GET'
         });
     }
