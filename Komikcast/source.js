@@ -1021,7 +1021,7 @@ exports.KomikcastMain = exports.getExportVersion = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const KomikcastMainParser_1 = require("./KomikcastMainParser");
 // Set the version for the base, changing this version will change the versions of all sources
-const BASE_VERSION = '1.0.1';
+const BASE_VERSION = '1.0.2';
 const getExportVersion = (EXTENSION_VERSION) => {
     return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.');
 };
@@ -1516,11 +1516,12 @@ class KomikcastMainParser {
         return chapterDetails;
     }
     parseTags($, source) {
-        var _a, _b;
+        var _a, _b, _c;
         const arrayTags = [];
         for (const tag of $(source.tags_selector_item, source.tags_selector_box).toArray()) {
-            const label = source.tags_selector_label ? $(source.tags_selector_label, tag).text().trim() : $(tag).text().trim();
-            const id = encodeURI((_b = (_a = $('a', tag).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${source.baseUrl}/genres/`, '').replace(/\//g, '')) !== null && _b !== void 0 ? _b : '');
+            const labelraw = source.tags_selector_label ? $(source.tags_selector_label, tag).text().trim() : $(tag).text().trim();
+            const label = (_a = labelraw === null || labelraw === void 0 ? void 0 : labelraw.split('(')[0]) !== null && _a !== void 0 ? _a : '';
+            const id = encodeURI((_c = (_b = $('a', tag).attr('href')) === null || _b === void 0 ? void 0 : _b.replace(`${source.baseUrl}/genres/`, '').replace(/\//g, '')) !== null && _c !== void 0 ? _c : '');
             if (!id || !label)
                 continue;
             arrayTags.push({ id: id, label: label });
