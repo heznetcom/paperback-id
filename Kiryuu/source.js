@@ -1100,14 +1100,14 @@ class KiryuuMain extends paperback_extensions_common_1.Source {
          */
         this.dateTimeAgo = {
             now: ['less than an hour', 'just now'],
-            yesterday: ['yesterday'],
-            years: ['year'],
-            months: ['month'],
-            weeks: ['week'],
-            days: ['day'],
-            hours: ['hour'],
-            minutes: ['min'],
-            seconds: ['second']
+            yesterday: ['kemarin'],
+            years: ['tahun'],
+            months: ['bulan'],
+            weeks: ['minggu'],
+            days: ['hari'],
+            hours: ['jam'],
+            minutes: ['menit'],
+            seconds: ['detik']
         };
         //----CHAPTER SELECTORS----
         /**

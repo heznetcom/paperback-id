@@ -934,7 +934,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const BacaKomikMain_1 = require("../BacaKomik/BacaKomikMain");
 const BACAKOMIK_DOMAIN = 'https://bacakomik.co';
 exports.BacaKomikInfo = {
-    version: '1.0.0',
+    version: '1.0.1',
     name: 'BacaKomik',
     description: 'Extension that pulls manga from BacaKomik',
     author: 'heznetcom',
@@ -971,12 +971,13 @@ class BacaKomik extends BacaKomikMain_1.BacaKomikMain {
         //}
         //----HOMESCREEN SELECTORS
         //Disabling some of these will cause some Home-Page tests to fail, be sure to test this in the app!
-        this.homescreen_PopularToday_enabled = false;
-        this.homescreen_LatestUpdate_enabled = true;
-        this.homescreen_NewManga_enabled = false;
-        this.homescreen_TopAllTime_enabled = true;
-        this.homescreen_TopMonthly_enabled = false;
-        this.homescreen_TopWeekly_enabled = false;
+        /**
+        override homescreen_NewManga_enabled = true
+        override homescreen_LatestUpdate_enabled = true
+        override homescreen_Colored_enabled = true
+        override homescreen_MangaRecom_enabled = true
+        override homescreen_TopAllTime_enabled = true
+        */
         /*
         ----TAG SELECTORS
         PRESET 1 (default): Genres are on homepage ex. https://mangagenki.com/
@@ -1158,17 +1159,17 @@ class BacaKomikMain extends paperback_extensions_common_1.Source {
          * Enabled Default = true
          * Selector Default = "h2:contains(Popular Today)"
         */
-        this.homescreen_PopularToday_enabled = false;
-        this.homescreen_PopularToday_selector = 'h2:contains(Terpopuler Hari Ini)';
-        this.homescreen_LatestUpdate_enabled = true;
+        //homescreen_PopularToday_enabled = false
+        //homescreen_PopularToday_selector = 'h2:contains(Terpopuler Hari Ini)'
         this.homescreen_LatestUpdate_selector_box = 'h2:contains(Baca Manga Terbaru)';
         this.homescreen_LatestUpdate_selector_item = 'div.animepost';
-        this.homescreen_NewManga_enabled = true;
-        this.homescreen_NewManga_selector = 'h3:contains(Serial baru)';
-        this.homescreen_TopAllTime_enabled = true;
+        this.homescreen_NewManga_selector = 'div.film-list';
+        this.homescreen_NewManga_selector_item = 'div.animepost';
         this.homescreen_TopAllTime_selector = 'div.serieslist.pop';
-        this.homescreen_TopMonthly_enabled = false;
-        this.homescreen_TopMonthly_selector = 'div.serieslist.pop.wpop.wpop-monthly';
+        this.homescreen_MangaRecom_selector_box = 'h3:contains(Komik Rekomendasi)';
+        this.homescreen_MangaRecom_selector = 'li';
+        this.homescreen_Colored_selector_box = 'h2:contains(Komik Berwarna)';
+        this.homescreen_Colored_selector_item = 'div.animepost';
         this.homescreen_TopWeekly_enabled = false;
         this.homescreen_TopWeekly_selector = 'div.serieslist.pop.wpop.wpop-weekly';
         //----PAGE SELECTOR----
@@ -1301,33 +1302,93 @@ class BacaKomikMain extends paperback_extensions_common_1.Source {
     }
     getHomePageSections(sectionCallback) {
         return __awaiter(this, void 0, void 0, function* () {
-            const section1 = createHomeSection({ id: 'popular_today', title: 'Popular Today', view_more: false });
-            const section2 = createHomeSection({ id: 'latest_update', title: 'Latest Updates', view_more: true });
-            const section3 = createHomeSection({ id: 'new_titles', title: 'New Titles', view_more: true });
-            const section4 = createHomeSection({ id: 'top_alltime', title: 'Top All Time', view_more: true });
-            const section5 = createHomeSection({ id: 'top_monthly', title: 'Top Monthly', view_more: false });
-            const section6 = createHomeSection({ id: 'top_weekly', title: 'Top Weekly', view_more: false });
-            const sections = [];
-            if (this.homescreen_PopularToday_enabled)
-                sections.push(section1);
-            if (this.homescreen_LatestUpdate_enabled)
-                sections.push(section2);
-            if (this.homescreen_NewManga_enabled)
-                sections.push(section3);
-            if (this.homescreen_TopAllTime_enabled)
-                sections.push(section4);
-            if (this.homescreen_TopMonthly_enabled)
-                sections.push(section5);
-            if (this.homescreen_TopWeekly_enabled)
-                sections.push(section6);
-            const request = createRequestObject({
-                url: `${this.baseUrl}/`,
-                method: 'GET'
-            });
-            const response = yield this.requestManager.schedule(request, 1);
-            this.CloudFlareError(response.status);
-            const $ = this.cheerio.load(response.data);
-            this.parser.parseHomeSections($, sections, sectionCallback, this);
+            const sectionRequests = [
+                {
+                    request: createRequestObject({
+                        url: `${this.baseUrl}/`,
+                        method: 'GET'
+                    }),
+                    section: createHomeSection({
+                        id: 'latest_update',
+                        title: 'Latest Updates',
+                        view_more: true,
+                    }),
+                },
+                {
+                    request: createRequestObject({
+                        url: `${this.baseUrl}/daftar-manga/?order=latest`,
+                        method: 'GET'
+                    }),
+                    section: createHomeSection({
+                        id: 'new_titles',
+                        title: 'New Titles',
+                        view_more: true,
+                    }),
+                },
+                {
+                    request: createRequestObject({
+                        url: `${this.baseUrl}/`,
+                        method: 'GET'
+                    }),
+                    section: createHomeSection({
+                        id: 'colored_manga',
+                        title: 'Colored Updates',
+                        view_more: true
+                    }),
+                },
+                {
+                    request: createRequestObject({
+                        url: `${this.baseUrl}/`,
+                        method: 'GET'
+                    }),
+                    section: createHomeSection({
+                        id: 'manga_recom',
+                        title: 'Recommendation',
+                        view_more: false
+                    }),
+                },
+                {
+                    request: createRequestObject({
+                        url: `${this.baseUrl}/`,
+                        method: 'GET'
+                    }),
+                    section: createHomeSection({
+                        id: 'top_alltime',
+                        title: 'Top All Time',
+                        view_more: true
+                    }),
+                },
+            ];
+            const promises = [];
+            for (const sectionRequest of sectionRequests) {
+                // Let the app load empty sections
+                sectionCallback(sectionRequest.section);
+                // Get the section data
+                promises.push(this.requestManager.schedule(sectionRequest.request, 1).then(response => {
+                    const $ = this.cheerio.load(response.data);
+                    switch (sectionRequest.section.id) {
+                        case 'new_titles':
+                            sectionRequest.section.items = this.parser.parseNewTitles($, this);
+                            break;
+                        case 'latest_update':
+                            sectionRequest.section.items = this.parser.parseHomeSections($, this);
+                            break;
+                        case 'colored_manga':
+                            sectionRequest.section.items = this.parser.parseColorSections($, this);
+                            break;
+                        case 'manga_recom':
+                            sectionRequest.section.items = this.parser.parseRecomSections($, this);
+                            break;
+                        case 'top_alltime':
+                            sectionRequest.section.items = this.parser.parsePopularSections($, this);
+                            break;
+                        default:
+                    }
+                    sectionCallback(sectionRequest.section);
+                }));
+            }
+            // Make sure the function completes
+            yield Promise.all(promises);
         });
     }
     getViewMoreItems(homepageSectionId, metadata) {
@@ -1337,10 +1398,13 @@ class BacaKomikMain extends paperback_extensions_common_1.Source {
             let param = '';
             switch (homepageSectionId) {
                 case 'new_titles':
-                    param = `/${this.sourceTraversalPathName}/?page=${page}&order=latest`;
+                    param = `/daftar-manga/page/${page}/?order=latest`;
                     break;
                 case 'latest_update':
                     param = `/komik-terbaru/page/${page}/`;
+                    break;
+                case 'colored_manga':
+                    param = `/komik-berwarna/page/${page}/`;
                     break;
                 case 'top_alltime':
                     param = `/daftar-manga/page/${page}/?order=popular`;
@@ -1387,6 +1451,99 @@ const LanguageUtils_1 = require("../LanguageUtils");
 const entities = require("entities");
 class BacaKomikMainParser {
     constructor() {
+        this.parseNewTitles = ($, source) => {
+            var _a, _b, _c;
+            const NewTTl = [];
+            for (const manga of $(source.homescreen_NewManga_selector_item, source.homescreen_NewManga_selector).toArray()) {
+                const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
+                const title = $('h4', manga).text();
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/bd7207342500dcc9a18edb11.forthumbnail.xyz/tempiker/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                if (!id || !title)
+                    continue;
+                NewTTl.push(createMangaTile({
+                    id: id,
+                    image: image ? image : source.fallbackImage,
+                    title: createIconText({ text: this.decodeHTMLEntity(title) }),
+                }));
+            }
+            return NewTTl;
+        };
+        this.parseHomeSections = ($, source) => {
+            var _a, _b, _c;
+            const latestUpdate = [];
+            for (const manga of $(source.homescreen_LatestUpdate_selector_item, $(source.homescreen_LatestUpdate_selector_box).parent().next()).toArray()) {
+                const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
+                const title = $('h4', manga).text();
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/bd7207342500dcc9a18edb11.forthumbnail.xyz/tempiker/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                const subtitle = $('a', $('div.lsch', manga).first()).text().trim();
+                if (!id || !title)
+                    continue;
+                latestUpdate.push(createMangaTile({
+                    id: id,
+                    image: image ? image : source.fallbackImage,
+                    title: createIconText({ text: this.decodeHTMLEntity(title) }),
+                    subtitleText: createIconText({ text: subtitle }),
+                }));
+            }
+            return latestUpdate;
+        };
+        this.parseColorSections = ($, source) => {
+            var _a, _b, _c;
+            const ColorUpdate = [];
+            for (const manga of $(source.homescreen_Colored_selector_item, $(source.homescreen_Colored_selector_box).parent().next()).toArray()) {
+                const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
+                const title = $('h4', manga).text();
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/bd7207342500dcc9a18edb11.forthumbnail.xyz/tempiker/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                const subtitle = $('.adds a', manga).text();
+                if (!id || !title)
+                    continue;
+                ColorUpdate.push(createMangaTile({
+                    id: id,
+                    image: image ? image : source.fallbackImage,
+                    title: createIconText({ text: this.decodeHTMLEntity(title) }),
+                    subtitleText: createIconText({ text: subtitle }),
+                }));
+            }
+            return ColorUpdate;
+        };
+        this.parseRecomSections = ($, source) => {
+            var _a, _b, _c;
+            const RecomManga = [];
+            for (const manga of $(source.homescreen_MangaRecom_selector, $(source.homescreen_MangaRecom_selector_box).parent()).toArray()) {
+                const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
+                const title = $('h4', manga).text().trim();
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/bd7207342500dcc9a18edb11.forthumbnail.xyz/tempiker/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                const subtitle = $('span.years', manga).text().trim();
+                if (!id || !title)
+                    continue;
+                RecomManga.push(createMangaTile({
+                    id: id,
+                    image: image ? image : source.fallbackImage,
+                    title: createIconText({ text: this.decodeHTMLEntity(title) }),
+                    subtitleText: createIconText({ text: subtitle }),
+                }));
+            }
+            return RecomManga;
+        };
+        this.parsePopularSections = ($, source) => {
+            var _a, _b, _c;
+            const PopularManga = [];
+            for (const manga of $('li', source.homescreen_TopAllTime_selector).toArray()) {
+                const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
+                const title = $('h4', manga).text().trim();
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/bd7207342500dcc9a18edb11.forthumbnail.xyz/tempiker/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                const subtitle = $('span.author', manga).text().trim();
+                if (!id || !title)
+                    continue;
+                PopularManga.push(createMangaTile({
+                    id: id,
+                    image: image ? image : source.fallbackImage,
+                    title: createIconText({ text: this.decodeHTMLEntity(title) }),
+                    subtitleText: createIconText({ text: subtitle }),
+                }));
+            }
+            return PopularManga;
+        };
         this.parseViewMore = ($, source) => {
             var _a, _b, _c;
             const mangas = [];
@@ -1580,135 +1737,6 @@ class BacaKomikMainParser {
             ids: updatedManga,
             loadMore,
         };
-    }
-    parseHomeSections($, sections, sectionCallback, source) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
-        for (const section of sections) {
-            //Popular Today
-            if (section.id == 'popular_today') {
-                const popularToday = [];
-                if (!$('div.bsx', (_b = (_a = $(source.homescreen_PopularToday_selector)) === null || _a === void 0 ? void 0 : _a.parent()) === null || _b === void 0 ? void 0 : _b.next()).length) {
-                    console.log('Unable to parse valid Popular Today section!');
-                    continue;
-                }
-                for (const manga of $('div.bsx', $(source.homescreen_PopularToday_selector).parent().next()).toArray()) {
-                    const id = this.idCleaner((_c = $('a', manga).attr('href')) !== null && _c !== void 0 ? _c : '', source);
-                    const title = $('div.tt', manga).text().trim();
-                    const image = (_e = (_d = this.getImageSrc($('img', manga))) === null || _d === void 0 ? void 0 : _d.split('?resize')[0]) !== null && _e !== void 0 ? _e : '';
-                    const subtitle = $('div.epxs', manga).text().trim();
-                    if (!id || !title)
-                        continue;
-                    popularToday.push(createMangaTile({
-                        id: id,
-                        image: image ? image : source.fallbackImage,
-                        title: createIconText({ text: this.decodeHTMLEntity(title) }),
-                        subtitleText: createIconText({ text: subtitle }),
-                    }));
-                }
-                section.items = popularToday;
-                sectionCallback(section);
-            }
-            //Latest Update
-            if (section.id == 'latest_update') {
-                const latestUpdate = [];
-                if (!$(source.homescreen_LatestUpdate_selector_item, (_g = (_f = $(source.homescreen_LatestUpdate_selector_box)) === null || _f === void 0 ? void 0 : _f.parent()) === null || _g === void 0 ? void 0 : _g.next()).length) {
-                    console.log('Unable to parse valid Latest Update section!');
-                    continue;
-                }
-                for (const manga of $(source.homescreen_LatestUpdate_selector_item, $(source.homescreen_LatestUpdate_selector_box).parent().next()).toArray()) {
-                    const id = this.idCleaner((_h = $('a', manga).attr('href')) !== null && _h !== void 0 ? _h : '', source);
-                    const title = $('h4', manga).text();
-                    const image = (_k = (_j = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/bd7207342500dcc9a18edb11.forthumbnail.xyz/tempiker/', 'https://bacakomik.co/wp-content/uploads/')) === null || _j === void 0 ? void 0 : _j.split('?resize')[0]) !== null && _k !== void 0 ? _k : '';
-                    const subtitle = $('a', $('div.lsch', manga).first()).text().trim();
-                    if (!id || !title)
-                        continue;
-                    latestUpdate.push(createMangaTile({
-                        id: id,
-                        image: image ? image : source.fallbackImage,
-                        title: createIconText({ text: this.decodeHTMLEntity(title) }),
-                        subtitleText: createIconText({ text: subtitle }),
-                    }));
-                }
-                section.items = latestUpdate;
-                sectionCallback(section);
-            }
-            //New Titles
-            if (section.id == 'new_titles') {
-                const NewTitles = [];
-                if (!$('li', (_m = (_l = $(source.homescreen_NewManga_selector)) === null || _l === void 0 ? void 0 : _l.parent()) === null || _m === void 0 ? void 0 : _m.next()).length) {
-                    console.log('Unable to parse valid New Titles section!');
-                    continue;
-                }
-                for (const manga of $('li', $(source.homescreen_NewManga_selector).parent().next()).toArray()) {
-                    const id = this.idCleaner((_o = $('a', manga).attr('href')) !== null && _o !== void 0 ? _o : '', source);
-                    const title = $('h2', manga).text().trim();
-                    const image = (_q = (_p = this.getImageSrc($('img', manga))) === null || _p === void 0 ? void 0 : _p.split('?resize')[0]) !== null && _q !== void 0 ? _q : '';
-                    if (!id || !title)
-                        continue;
-                    NewTitles.push(createMangaTile({
-                        id: id,
-                        image: image ? image : source.fallbackImage,
-                        title: createIconText({ text: this.decodeHTMLEntity(title) }),
-                    }));
-                }
-                section.items = NewTitles;
-                sectionCallback(section);
-            }
-            //Top All Time
-            if (section.id == 'top_alltime') {
-                const TopAllTime = [];
-                for (const manga of $('li', source.homescreen_TopAllTime_selector).toArray()) {
-                    const id = this.idCleaner((_r = $('a', manga).attr('href')) !== null && _r !== void 0 ? _r : '', source);
-                    const title = $('h4', manga).text().trim();
-                    const image = (_t = (_s = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/bd7207342500dcc9a18edb11.forthumbnail.xyz/tempiker/', 'https://bacakomik.co/wp-content/uploads/')) === null || _s === void 0 ? void 0 : _s.split('?resize')[0]) !== null && _t !== void 0 ? _t : '';
-                    if (!id || !title)
-                        continue;
-                    TopAllTime.push(createMangaTile({
-                        id: id,
-                        image: image ? image : source.fallbackImage,
-                        title: createIconText({ text: this.decodeHTMLEntity(title) }),
-                    }));
-                }
-                section.items = TopAllTime;
-                sectionCallback(section);
-            }
-            //Top Monthly
-            if (section.id == 'top_monthly') {
-                const TopMonthly = [];
-                for (const manga of $('li', source.homescreen_TopMonthly_selector).toArray()) {
-                    const id = this.idCleaner((_u = $('a', manga).attr('href')) !== null && _u !== void 0 ? _u : '', source);
-                    const title = $('h2', manga).text().trim();
-                    const image = (_w = (_v = this.getImageSrc($('img', manga))) === null || _v === void 0 ? void 0 : _v.split('?resize')[0]) !== null && _w !== void 0 ? _w : '';
-                    if (!id || !title)
-                        continue;
-                    TopMonthly.push(createMangaTile({
-                        id: id,
-                        image: image ? image : source.fallbackImage,
-                        title: createIconText({ text: this.decodeHTMLEntity(title) }),
-                    }));
-                }
-                section.items = TopMonthly;
-                sectionCallback(section);
-            }
-            //Top Weekly
-            if (section.id == 'top_weekly') {
-                const TopWeekly = [];
-                for (const manga of $('li', source.homescreen_TopWeekly_selector).toArray()) {
-                    const id = this.idCleaner((_x = $('a', manga).attr('href')) !== null && _x !== void 0 ? _x : '', source);
-                    const title = $('h2', manga).text().trim();
-                    const image = (_z = (_y = this.getImageSrc($('img', manga))) === null || _y === void 0 ? void 0 : _y.split('?resize')[0]) !== null && _z !== void 0 ? _z : '';
-                    if (!id || !title)
-                        continue;
-                    TopWeekly.push(createMangaTile({
-                        id: id,
-                        image: image ? image : source.fallbackImage,
-                        title: createIconText({ text: this.decodeHTMLEntity(title) }),
-                    }));
-                }
-                section.items = TopWeekly;
-                sectionCallback(section);
-            }
-        }
     }
     getImageSrc(imageObj) {
         var _a, _b, _c;

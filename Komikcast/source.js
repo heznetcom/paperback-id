@@ -954,10 +954,6 @@ exports.KomikcastInfo = {
         {
             text: 'CloudFlare',
             type: paperback_extensions_common_1.TagType.RED
-        },
-        {
-            text: 'Buggy',
-            type: paperback_extensions_common_1.TagType.RED
         }
     ]
 };
@@ -1021,7 +1017,7 @@ exports.KomikcastMain = exports.getExportVersion = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const KomikcastMainParser_1 = require("./KomikcastMainParser");
 // Set the version for the base, changing this version will change the versions of all sources
-const BASE_VERSION = '1.0.2';
+const BASE_VERSION = '1.0.4';
 const getExportVersion = (EXTENSION_VERSION) => {
     return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.');
 };
@@ -1255,9 +1251,9 @@ class KomikcastMain extends paperback_extensions_common_1.Source {
             let request;
             if (query.title) {
                 request = createRequestObject({
-                    url: `${this.baseUrl}/page/${page}/?s=`,
+                    url: `${this.baseUrl}/`,
                     method: 'GET',
-                    param: encodeURI(query.title)
+                    param: `search/${encodeURI(query.title)}/page/${page}`
                 });
             }
             else {
