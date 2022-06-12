@@ -932,7 +932,7 @@ exports.Komikcast = exports.KomikcastInfo = void 0;
 /* eslint-disable linebreak-style */
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const KomikcastMain_1 = require("./KomikcastMain");
-const KOMIKCAST_DOMAIN = 'https://komikcast.com';
+const KOMIKCAST_DOMAIN = 'https://komikcast.me';
 exports.KomikcastInfo = {
     version: KomikcastMain_1.getExportVersion('0.0.0'),
     name: 'Komikcast',
@@ -1017,7 +1017,7 @@ exports.KomikcastMain = exports.getExportVersion = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const KomikcastMainParser_1 = require("./KomikcastMainParser");
 // Set the version for the base, changing this version will change the versions of all sources
-const BASE_VERSION = '1.0.4';
+const BASE_VERSION = '1.0.5';
 const getExportVersion = (EXTENSION_VERSION) => {
     return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.');
 };
@@ -1108,12 +1108,12 @@ class KomikcastMain extends paperback_extensions_common_1.Source {
         this.dateTimeAgo = {
             now: ['less than an hour', 'just now'],
             yesterday: ['yesterday'],
-            years: ['year'],
-            months: ['month'],
+            years: ['years'],
+            months: ['months'],
             weeks: ['weeks'],
-            days: ['day'],
-            hours: ['hour'],
-            minutes: ['min'],
+            days: ['days'],
+            hours: ['hours'],
+            minutes: ['mins'],
             seconds: ['second']
         };
         //----CHAPTER SELECTORS----
@@ -1501,7 +1501,7 @@ class KomikcastMainParser {
                 image = (_b = $(p).attr('data-src')) !== null && _b !== void 0 ? _b : '';
             if (!image)
                 throw new Error(`Unable to parse image(s) for chapterID: ${chapterId}`);
-            pages.push(image);
+            pages.push(image.replace('img.statically.io/img/kcast/', ''));
         }
         const chapterDetails = createChapterDetails({
             id: chapterId,
