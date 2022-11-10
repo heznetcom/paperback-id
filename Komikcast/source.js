@@ -932,7 +932,7 @@ exports.Komikcast = exports.KomikcastInfo = void 0;
 /* eslint-disable linebreak-style */
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const KomikcastMain_1 = require("./KomikcastMain");
-const KOMIKCAST_DOMAIN = 'https://komikcast.me';
+const KOMIKCAST_DOMAIN = 'https://komikcast.site';
 exports.KomikcastInfo = {
     version: KomikcastMain_1.getExportVersion('0.0.0'),
     name: 'Komikcast',
@@ -1017,7 +1017,7 @@ exports.KomikcastMain = exports.getExportVersion = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const KomikcastMainParser_1 = require("./KomikcastMainParser");
 // Set the version for the base, changing this version will change the versions of all sources
-const BASE_VERSION = '1.0.5';
+const BASE_VERSION = '1.0.6';
 const getExportVersion = (EXTENSION_VERSION) => {
     return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.');
 };
@@ -1108,12 +1108,12 @@ class KomikcastMain extends paperback_extensions_common_1.Source {
         this.dateTimeAgo = {
             now: ['less than an hour', 'just now'],
             yesterday: ['yesterday'],
-            years: ['years'],
-            months: ['months'],
+            years: ['year'],
+            months: ['month'],
             weeks: ['weeks'],
-            days: ['days'],
-            hours: ['hours'],
-            minutes: ['mins'],
+            days: ['day'],
+            hours: ['hour'],
+            minutes: ['min'],
             seconds: ['second']
         };
         //----CHAPTER SELECTORS----
@@ -1283,7 +1283,7 @@ class KomikcastMain extends paperback_extensions_common_1.Source {
             };
             while (updatedManga.loadMore) {
                 const request = createRequestObject({
-                    url: `${this.baseUrl}/daftar-komik/page/${page++}/?sortby=update`,
+                    url: `${this.baseUrl}/daftar-komik/page/${page++}/?orderby=update`,
                     method: 'GET'
                 });
                 const response = yield this.requestManager.schedule(request, 1);
@@ -1501,7 +1501,7 @@ class KomikcastMainParser {
                 image = (_b = $(p).attr('data-src')) !== null && _b !== void 0 ? _b : '';
             if (!image)
                 throw new Error(`Unable to parse image(s) for chapterID: ${chapterId}`);
-            pages.push(image.replace('img.statically.io/img/kcast/', ''));
+            pages.push(image);
         }
         const chapterDetails = createChapterDetails({
             id: chapterId,
