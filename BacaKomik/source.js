@@ -934,7 +934,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const BacaKomikMain_1 = require("../BacaKomik/BacaKomikMain");
 const BACAKOMIK_DOMAIN = 'https://bacakomik.co';
 exports.BacaKomikInfo = {
-    version: '1.0.2',
+    version: '1.0.4',
     name: 'BacaKomik',
     description: 'Extension that pulls manga from BacaKomik',
     author: 'heznetcom',
@@ -1017,7 +1017,7 @@ exports.BacaKomikMain = exports.getExportVersion = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const BacaKomikMainParser_1 = require("../BacaKomik/BacaKomikMainParser");
 // Set the version for the base, changing this version will change the versions of all sources
-const BASE_VERSION = '1.0.0';
+const BASE_VERSION = '1.0.4';
 const getExportVersion = (EXTENSION_VERSION) => {
     return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.');
 };
@@ -1028,7 +1028,8 @@ class BacaKomikMain extends paperback_extensions_common_1.Source {
         /**
          * Helps with CloudFlare for some sources, makes it worse for others; override with empty string if the latter is true
          */
-        this.userAgentRandomizer = `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/78.0${Math.floor(Math.random() * 100000)}`;
+        this.userAgentRandomizer = 'Mozilla/5.0 (Linux; U; Android 4.1.1; en-gb; Build/KLP) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Safari/534.30';
+        this.headerAcceptimage = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3';
         //----GENERAL SELECTORS----
         /**
          * The pathname between the domain and the manga.
@@ -1161,7 +1162,7 @@ class BacaKomikMain extends paperback_extensions_common_1.Source {
         */
         //homescreen_PopularToday_enabled = false
         //homescreen_PopularToday_selector = 'h2:contains(Terpopuler Hari Ini)'
-        this.homescreen_LatestUpdate_selector_box = 'h2:contains(Baca Manga Terbaru)';
+        this.homescreen_LatestUpdate_selector_box = 'h2:contains(Update Chapter Komik Terbaru)';
         this.homescreen_LatestUpdate_selector_item = 'div.animepost';
         this.homescreen_NewManga_selector = 'div.film-list';
         this.homescreen_NewManga_selector_item = 'div.animepost';
@@ -1184,7 +1185,8 @@ class BacaKomikMain extends paperback_extensions_common_1.Source {
                     var _a;
                     request.headers = Object.assign(Object.assign({}, ((_a = request.headers) !== null && _a !== void 0 ? _a : {})), {
                         'user-agent': this.userAgentRandomizer,
-                        'referer': this.baseUrl
+                        'referer': this.baseUrl,
+                        'accept-encoding': this.headerAcceptimage
                     });
                     return request;
                 }),
@@ -1305,7 +1307,7 @@ class BacaKomikMain extends paperback_extensions_common_1.Source {
             const sectionRequests = [
                 {
                     request: createRequestObject({
-                        url: `${this.baseUrl}/`,
+                        url: `${this.baseUrl}/komik-terbaru`,
                         method: 'GET'
                     }),
                     section: createHomeSection({
@@ -1457,7 +1459,7 @@ class BacaKomikMainParser {
             for (const manga of $(source.homescreen_NewManga_selector_item, source.homescreen_NewManga_selector).toArray()) {
                 const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
                 const title = $('h4', manga).text();
-                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/afk.andakepo.buzz/uploads/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/menantuincaran.lol/gbr/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
                 if (!id || !title)
                     continue;
                 NewTTl.push(createMangaTile({
@@ -1474,8 +1476,8 @@ class BacaKomikMainParser {
             for (const manga of $(source.homescreen_LatestUpdate_selector_item, $(source.homescreen_LatestUpdate_selector_box).parent().next()).toArray()) {
                 const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
                 const title = $('h4', manga).text();
-                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/afk.andakepo.buzz/uploads/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
-                const subtitle = $('a', $('div.lsch', manga).first()).text().trim();
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/menantuincaran.lol/gbr/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                const subtitle = $('a', $('div.adds', manga)).text().trim();
                 if (!id || !title)
                     continue;
                 latestUpdate.push(createMangaTile({
@@ -1493,7 +1495,7 @@ class BacaKomikMainParser {
             for (const manga of $(source.homescreen_Colored_selector_item, $(source.homescreen_Colored_selector_box).parent().next()).toArray()) {
                 const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
                 const title = $('h4', manga).text();
-                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/afk.andakepo.buzz/uploads/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/menantuincaran.lol/gbr/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
                 const subtitle = $('.adds a', manga).text();
                 if (!id || !title)
                     continue;
@@ -1512,7 +1514,7 @@ class BacaKomikMainParser {
             for (const manga of $(source.homescreen_MangaRecom_selector, $(source.homescreen_MangaRecom_selector_box).parent()).toArray()) {
                 const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
                 const title = $('h4', manga).text().trim();
-                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/afk.andakepo.buzz/uploads/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/menantuincaran.lol/gbr/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
                 const subtitle = $('span.years', manga).text().trim();
                 if (!id || !title)
                     continue;
@@ -1531,7 +1533,7 @@ class BacaKomikMainParser {
             for (const manga of $('li', source.homescreen_TopAllTime_selector).toArray()) {
                 const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
                 const title = $('h4', manga).text().trim();
-                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/afk.andakepo.buzz/uploads/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/menantuincaran.lol/gbr/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
                 const subtitle = $('span.author', manga).text().trim();
                 if (!id || !title)
                     continue;
@@ -1551,7 +1553,7 @@ class BacaKomikMainParser {
             for (const manga of $('div.animepost', 'div.listupd').toArray()) {
                 const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
                 const title = $('h4', manga).text();
-                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/afk.andakepo.buzz/uploads/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+                const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/menantuincaran.lol/gbr/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
                 const subtitle = $('.adds > a', manga).text().trim();
                 if (collectedIds.includes(id) || !id || !title)
                     continue;
@@ -1587,7 +1589,7 @@ class BacaKomikMainParser {
         //const altTitles = $(`div.seriestualt`).text() //Language dependant
         const author = $(`span:contains(${source.manga_selector_author}), .fmed b:contains(${source.manga_selector_author})+span, td:contains(${source.manga_selector_author})+td, .imptdt:contains(${source.manga_selector_author}) i`).contents().remove().last().text().trim(); //Language dependant
         const artist = $(`span:contains(${source.manga_selector_artist}), .fmed b:contains(${source.manga_selector_artist})+span, td:contains(${source.manga_selector_artist})+td, .imptdt:contains(${source.manga_selector_artist}) i`).contents().remove().last().text().trim(); //Language dependant
-        const image = (_b = (_a = this.getImageSrc($('img', 'div[itemprop="image"]')).replace('https://i2.wp.com/afk.andakepo.buzz/uploads/', 'https://bacakomik.co/wp-content/uploads/')) === null || _a === void 0 ? void 0 : _a.split('?resize')[0]) !== null && _b !== void 0 ? _b : '';
+        const image = (_b = (_a = this.getImageSrc($('img', 'div[itemprop="image"]')).replace('https://i2.wp.com/menantuincaran.lol/gbr/', 'https://bacakomik.co/wp-content/uploads/')) === null || _a === void 0 ? void 0 : _a.split('?resize')[0]) !== null && _b !== void 0 ? _b : '';
         const description = this.decodeHTMLEntity($('div[itemprop="description"]').text().trim());
         //const description = image
         const arrayTags = [];
@@ -1633,7 +1635,7 @@ class BacaKomikMainParser {
         for (const chapter of $(source.chapter_selector_item, source.chapter_selector_box).toArray()) {
             const title = $('span.lchx', chapter).text().trim();
             const id = this.idCleaner((_a = $('a', chapter).attr('href')) !== null && _a !== void 0 ? _a : '', source);
-            const date = LanguageUtils_1.convertDateAgo($('span.dt', chapter).text().trim(), source);
+            const date = LanguageUtils_1.convertDateAgo($('span.dt', chapter).text().trim().replace(' yang lalu', ''), source);
             const getNumber = $('chapter', chapter).text();
             const chapterNumberRegex = getNumber.match(/(\d+\.?\d?)+/);
             let chapterNumber = 0;
@@ -1654,12 +1656,12 @@ class BacaKomikMainParser {
     }
     parseChapterDetails($, mangaId, chapterId) {
         //const data = $.html()
-        var _a, _b;
+        var _a, _b, _c;
         const pages = [];
         for (const p of $('img', 'div#chimg-auh').toArray()) {
-            let image = (_a = $(p).attr('src')) !== null && _a !== void 0 ? _a : '';
+            let image = (_b = (_a = $(p).attr('src')) === null || _a === void 0 ? void 0 : _a.replace('https://i2.wp.com/', 'https://')) !== null && _b !== void 0 ? _b : '';
             if (!image)
-                image = (_b = $(p).attr('data-src')) !== null && _b !== void 0 ? _b : '';
+                image = (_c = $(p).attr('data-src')) !== null && _c !== void 0 ? _c : '';
             if (!image)
                 throw new Error(`Unable to parse image(s) for chapterID: ${chapterId}`);
             pages.push(image);
@@ -1689,7 +1691,7 @@ class BacaKomikMainParser {
         for (const manga of $('div.animepost', 'div.film-list').toArray()) {
             const id = this.idCleaner((_a = $('a', manga).attr('href')) !== null && _a !== void 0 ? _a : '', source);
             const title = $('h4', manga).text();
-            const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/afk.andakepo.buzz/uploads/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
+            const image = (_c = (_b = this.getImageSrc($('img', manga)).replace('https://i2.wp.com/menantuincaran.lol/gbr/', 'https://bacakomik.co/wp-content/uploads/')) === null || _b === void 0 ? void 0 : _b.split('?resize')[0]) !== null && _c !== void 0 ? _c : '';
             const subtitle = $('div.epxs', manga).text().trim();
             if (collectedIds.includes(id) || !id || !title)
                 continue;
@@ -1712,7 +1714,7 @@ class BacaKomikMainParser {
             throw new Error('Unable to parse valid update section!');
         for (const manga of $(source.pagescreen_LatestUpdate_selector_item, $(source.pagescreen_LatestUpdate_selector_box).parent().next()).toArray()) {
             const id = this.idCleaner((_c = $('a', manga).attr('href')) !== null && _c !== void 0 ? _c : '', source);
-            const mangaDate = LanguageUtils_1.convertDateAgo($('div.datech', manga).first().text().trim(), source);
+            const mangaDate = LanguageUtils_1.convertDateAgo($('div.datech', manga).text().replace(' yang lalu', ''), source);
             //Check if manga time is older than the time porvided, is this manga has an update. Return this.
             if (!id)
                 continue;

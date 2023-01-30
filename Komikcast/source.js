@@ -932,7 +932,7 @@ exports.Komikcast = exports.KomikcastInfo = void 0;
 /* eslint-disable linebreak-style */
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const KomikcastMain_1 = require("./KomikcastMain");
-const KOMIKCAST_DOMAIN = 'https://komikcast.site';
+const KOMIKCAST_DOMAIN = 'https://komikcast.com';
 exports.KomikcastInfo = {
     version: KomikcastMain_1.getExportVersion('0.0.0'),
     name: 'Komikcast',
@@ -1283,7 +1283,7 @@ class KomikcastMain extends paperback_extensions_common_1.Source {
             };
             while (updatedManga.loadMore) {
                 const request = createRequestObject({
-                    url: `${this.baseUrl}/daftar-komik/page/${page++}/?orderby=update`,
+                    url: `${this.baseUrl}/daftar-komik/page/${page++}/?sortby=update`,
                     method: 'GET'
                 });
                 const response = yield this.requestManager.schedule(request, 1);
